@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Búsqueda{% endblock %}
+{% block content %}
+<h1>Búsqueda</h1>
+
+<form method="get" action="/busqueda">
+  <div>
+    <label>Buscar por</label>
+    <select name="tipo">
+      <option value="gamertag" {% if tipo == 'gamertag' %}selected{% endif %}>Gamertag</option>
+      <option value="pais"     {% if tipo == 'pais'     %}selected{% endif %}>País</option>
+      <option value="equipo"   {% if tipo == 'equipo'   %}selected{% endif %}>Nombre de equipo</option>
+    </select>
+  </div>
+  <div>
+    <label>Texto</label>
+    <input type="text" name="q" value="{{ q }}" placeholder="Escribe para buscar..." required>
+  </div>
+  <button type="submit">Buscar</button>
+</form>
+
+{% if q %}
+  {% if tipo in ('gamertag', 'pais') %}
+    <h2>Jugadores encontrados ({{ jugadores | length }})</h2>
+    {% if jugadores %}
+    <table>
+      <thead>
+        <tr><th>Gamertag</th><th>Nombre Real</th><th>País</th><th>Fecha Nac.</th><th>Equipo</th></tr>
+      </thead>
+      <tbody>
+        {% for j in jugadores %}
+        <tr>
+          <td><strong>{{ j.gamertag }}</strong></td>
+          <td>{{ j.nombre_real }}</td>
+          <td>{{ j.pais }}</td>
+          <td>{{ j.fecha_nacimiento }}</td>
+          <td>{{ j.equipo }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <p>No se encontraron jugadores con esos criterios.</p>
+    {% endif %}
+
+  {% else %}
+    <h2>Equipos encontrados ({{ equipos | length }})</h2>
+    {% if equipos %}
+    <table>
+      <thead>
+        <tr><th>Equipo</th><th>Fundado</th><th>Capitán</th><th>Jugadores</th></tr>
+      </thead>
+      <tbody>
+        {% for e in equipos %}
+        <tr>
+          <td><strong>{{ e.nombre }}</strong></td>
+          <td>{{ e.fecha_creacion }}</td>
+          <td>{{ e.capitan }}</td>
+          <td>{{ e.num_jugadores }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <p>No se encontraron equipos con ese nombre.</p>
+    {% endif %}
+  {% endif %}
+{% endif %}
+
+{% endblock %}

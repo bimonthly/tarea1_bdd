@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Inscripción de Equipo{% endblock %}
+{% block content %}
+<h1>Inscripción de Equipo en Torneo</h1>
+
+{% if mensaje %}
+  {% if error %}
+    <div class="alert-err">&#10060; {{ mensaje }}</div>
+  {% else %}
+    <div class="alert-ok">&#10003; {{ mensaje }}</div>
+  {% endif %}
+{% endif %}
+
+<div class="card" style="max-width:500px">
+  <form method="post" action="/inscripcion">
+    <div style="width:100%">
+      <label>Equipo</label>
+      <select name="equipo_id" required style="width:100%">
+        <option value="">— Selecciona un equipo —</option>
+        {% for e in equipos %}
+        <option value="{{ e.id }}">{{ e.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div style="width:100%">
+      <label>Torneo</label>
+      <select name="torneo_id" required style="width:100%">
+        <option value="">— Selecciona un torneo —</option>
+        {% for t in torneos %}
+        <option value="{{ t.id }}">{{ t.nombre }} (max: {{ t.max_equipos }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" style="margin-top:0.5rem">Inscribir Equipo</button>
+  </form>
+</div>
+
+<p style="margin-top:1rem;color:#888;font-size:0.85rem">
+  Si el torneo ya alcanzó su número máximo de equipos, la inscripción será rechazada automáticamente.
+</p>
+{% endblock %}

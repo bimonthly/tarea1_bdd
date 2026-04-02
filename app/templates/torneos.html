@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Torneos{% endblock %}
+{% block content %}
+<h1>Torneos</h1>
+
+{% if not torneos %}
+  <p>No hay torneos registrados.</p>
+{% else %}
+<table>
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Videojuego</th>
+      <th>Inicio</th>
+      <th>Fin</th>
+      <th>Prize Pool (USD)</th>
+      <th>Equipos</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for t in torneos %}
+    <tr>
+      <td><strong>{{ t.nombre }}</strong></td>
+      <td>{{ t.videojuego }}</td>
+      <td>{{ t.fecha_inicio }}</td>
+      <td>{{ t.fecha_fin }}</td>
+      <td>${{ "{:,.0f}".format(t.prize_pool_usd) }}</td>
+      <td>
+        {{ t.equipos_inscritos }} / {{ t.max_equipos }}
+        {% if t.equipos_inscritos >= t.max_equipos %}
+          <span class="badge">LLENO</span>
+        {% endif %}
+      </td>
+      <td><a href="/torneos/{{ t.id }}">Ver detalle &rarr;</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

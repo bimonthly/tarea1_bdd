@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}{{ torneo.nombre }}{% endblock %}
+{% block content %}
+
+<a href="/torneos">&larr; Volver a Torneos</a>
+<h1 style="margin-top:0.7rem">{{ torneo.nombre }}</h1>
+<div class="card">
+  <strong>Videojuego:</strong> {{ torneo.videojuego }} &nbsp;|&nbsp;
+  <strong>Fecha:</strong> {{ torneo.fecha_inicio }} → {{ torneo.fecha_fin }} &nbsp;|&nbsp;
+  <strong>Prize Pool:</strong> ${{ "{:,.0f}".format(torneo.prize_pool_usd) }} USD &nbsp;|&nbsp;
+  <strong>Equipos:</strong> {{ torneo.max_equipos }} max
+</div>
+
+<!-- TABLA DE POSICIONES -->
+<h2>Tabla de Posiciones — Fase de Grupos</h2>
+{% if standings %}
+<table>
+  <thead>
+    <tr>
+      <th>#</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>Pts</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for s in standings %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td><strong>{{ s.nombre }}</strong>
+        {% if loop.index <= 2 %}<span class="badge badge-green">Clasifica</span>{% endif %}
+      </td>
+      <td>{{ s.jugadas }}</td>
+      <td>{{ s.ganadas }}</td>
+      <td>{{ s.empatadas }}</td>
+      <td>{{ s.perdidas }}</td>
+      <td><strong>{{ s.puntos }}</strong></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+  <p>No hay partidas de fase de grupos registradas.</p>
+{% endif %}
+
+<!-- PARTIDAS -->
+<h2>Partidas</h2>
+{% if partidas %}
+<table>
+  <thead>
+    <tr><th>Fecha y Hora</th><th>Fase</th><th>Equipo A</th><th>Resultado</th><th>Equipo B</th></tr>
+  </thead>
+  <tbody>
+    {% for p in partidas %}
+    {% set fase_label = {
+        'fase_grupos':  'Fase de Grupos',
+        'cuartos':      'Cuartos de Final',
+        'semifinal':    'Semifinal',
+        'final':        'Final'
+    } %}
+    <tr>
+      <td>{{ p.fecha_hora.strftime('%d/%m/%Y %H:%M') }}</td>
+      <td><span class="badge badge-yellow">{{ fase_label.get(p.fase, p.fase) }}</span></td>
+      <td>{{ p.equipo_a }}</td>
+      <td style="text-align:center;font-weight:bold">{{ p.puntaje_a }} – {{ p.puntaje_b }}</td>
+      <td>{{ p.equipo_b }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+  <p>No hay partidas registradas.</p>
+{% endif %}
+
+<div class="grid-2">
+  <!-- EQUIPOS INSCRITOS -->
+  <div>
+    <h2>Equipos Inscritos</h2>
+    {% if equipos %}
+    <table>
+      <thead><tr><th>Equipo</th><th>Capitán</th><th>Jugadores</th></tr></thead>
+      <tbody>
+        {% for e in equipos %}
+        <tr>
+          <td>{{ e.nombre }}</td>
+          <td>{{ e.capitan }}</td>
+          <td>{{ e.num_jugadores }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <p>Sin equipos inscritos.</p>
+    {% endif %}
+  </div>
+
+  <!-- SPONSORS -->
+  <div>
+    <h2>Sponsors</h2>
+    {% if sponsors %}
+    <table>
+      <thead><tr><th>Sponsor</th><th>Industria</th><th>Aporte (USD)</th></tr></thead>
+      <tbody>
+        {% for s in sponsors %}
+        <tr>
+          <td>{{ s.nombre }}</td>
+          <td>{{ s.industria }}</td>
+          <td>${{ "{:,.0f}".format(s.monto_usd) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <p>Sin sponsors.</p>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

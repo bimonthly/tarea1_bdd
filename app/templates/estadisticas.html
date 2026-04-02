@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Estadísticas{% endblock %}
+{% block content %}
+<h1>Estadísticas de Torneo</h1>
+
+<!-- Selector de torneo -->
+<form method="get" action="/estadisticas">
+  <div>
+    <label>Torneo</label>
+    <select name="torneo_id" required>
+      <option value="">— Selecciona un torneo —</option>
+      {% for t in torneos %}
+      <option value="{{ t.id }}" {% if torneo_id == t.id %}selected{% endif %}>{{ t.nombre }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button type="submit">Ver estadísticas</button>
+</form>
+
+{% if torneo_sel %}
+<h2>Torneo: {{ torneo_sel.nombre }}</h2>
+
+<!-- RANKING DE JUGADORES -->
+<h3>Ranking por ratio KOs / Restarts &nbsp;<small style="color:#888;font-size:0.8rem">(mín. 2 partidas)</small></h3>
+{% if ranking %}
+<table>
+  <thead>
+    <tr>
+      <th>#</th><th>Gamertag</th><th>Equipo</th>
+      <th>Partidas</th><th>KOs</th><th>Restarts</th><th>Assists</th><th>Ratio K/R</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in ranking %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td><strong>{{ r.gamertag }}</strong></td>
+      <td>{{ r.equipo }}</td>
+      <td>{{ r.partidas }}</td>
+      <td>{{ r.total_kos }}</td>
+      <td>{{ r.total_restarts }}</td>
+      <td>{{ r.total_assists }}</td>
+      <td>
+        {% if r.ratio is none %}
+          <span class="badge" title="Sin restarts (ratio infinito)">&#8734;</span>
+        {% else %}
+          {{ r.ratio }}
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+  <p>No hay jugadores con 2 o más partidas en este torneo.</p>
+{% endif %}
+
+<!-- EVOLUCIÓN POR FASE -->
+<h3 style="margin-top:1.5rem">Evolución por Fase — Selecciona un equipo</h3>
+<form method="get" action="/estadisticas">
+  <input type="hidden" name="torneo_id" value="{{ torneo_id }}">
+  <div>
+    <label>Equipo</label>
+    <select name="equipo_id" required>
+      <option value="">— Selecciona equipo —</option>
+      {% for e in equipos %}
+      <option value="{{ e.id }}" {% if equipo_id == e.id %}selected{% endif %}>{{ e.nombre }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button type="submit">Ver evolución</button>
+</form>
+
+{% if equipo_sel and evolucion %}
+<h3>{{ equipo_sel.nombre }} — Promedio por jugador por fase</h3>
+<table>
+  <thead>
+    <tr><th>Fase</th><th>Partidas</th><th>Avg KOs</th><th>Avg Restarts</th><th>Avg Assists</th></tr>
+  </thead>
+  <tbody>
+    {% for e in evolucion %}
+    <tr>
+      <td><strong>{{ e.etapa }}</strong></td>
+      <td>{{ e.partidas }}</td>
+      <td>{{ e.avg_kos }}</td>
+      <td>{{ e.avg_restarts }}</td>
+      <td>{{ e.avg_assists }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% elif equipo_sel %}
+  <p>El equipo seleccionado no tiene estadísticas en este torneo.</p>
+{% endif %}
+
+{% endif %}
+{% endblock %}

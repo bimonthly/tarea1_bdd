@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Sponsors{% endblock %}
+{% block content %}
+<h1>Sponsors por Videojuego</h1>
+<p style="color:#888;margin-bottom:1rem;font-size:0.9rem">
+  Muestra los sponsors que auspiciaron <strong>todos</strong> los torneos del videojuego seleccionado.
+</p>
+
+<form method="get" action="/sponsors">
+  <div>
+    <label>Videojuego</label>
+    <select name="videojuego" required>
+      <option value="">— Selecciona un videojuego —</option>
+      {% for vj in videojuegos %}
+      <option value="{{ vj }}" {% if videojuego == vj %}selected{% endif %}>{{ vj }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button type="submit">Filtrar</button>
+</form>
+
+{% if videojuego %}
+  <h2>Sponsors de todos los torneos de "{{ videojuego }}"</h2>
+  {% if sponsors %}
+  <table>
+    <thead>
+      <tr><th>#</th><th>Sponsor</th><th>Industria</th><th>Total Aportado (USD)</th></tr>
+    </thead>
+    <tbody>
+      {% for s in sponsors %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td><strong>{{ s.nombre }}</strong></td>
+        <td>{{ s.industria }}</td>
+        <td>${{ "{:,.0f}".format(s.total_aportado) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p>Ningún sponsor ha auspiciado <em>todos</em> los torneos de "{{ videojuego }}".</p>
+  {% endif %}
+{% endif %}
+
+{% endblock %}
