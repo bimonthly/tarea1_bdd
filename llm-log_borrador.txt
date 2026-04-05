@@ -1,0 +1,116 @@
+================================================================
+REGISTRO DE USO DE LLMs
+Tarea 1: Torneo de Gaming
+IIC2413 Bases de Datos · Primer Semestre 2026 · PUC Chile
+
+Pablo Rouliez Lagos · Daniel Aboitiz Halabi · Sebastián Cabrera Yañez
+================================================================
+
+
+1. HERRAMIENTA UTILIZADA
+-------------------------
+
+Se utilizó Claude (modelo claude-sonnet-4-6) a través de la interfaz
+Claude Code CLI de Anthropic durante el desarrollo de las Partes B y C
+de la tarea.
+
+
+2. PARTES DESARROLLADAS CON ASISTENCIA DE LLM
+-----------------------------------------------
+
+Parte A  — Generación del esquema relacional para análisis comparativo
+Parte B  — Diseño de schema.sql y generación de data.sql
+Parte C  — Implementación del backend FastAPI, consultas SQL y templates Jinja2
+README   — Documentación e instrucciones de instalación
+
+
+3. PROMPTS UTILIZADOS
+----------------------
+
+Prompt principal:
+
+Se entregó al LLM el enunciado completo de la tarea junto con las
+siguientes instrucciones explícitas:
+
+"Actúa como un Arquitecto de Bases de Datos Senior y Desarrollador
+Full-Stack experto. [...] REGLA DE ORO INQUEBRANTABLE: ESTÁ
+ESTRICTAMENTE PROHIBIDO EL USO DE CUALQUIER ORM [...] Para el stack
+web utiliza Python con FastAPI y la librería psycopg para conectarte
+a la base de datos. Para el frontend renderiza vistas simples usando
+plantillas Jinja2 directamente desde FastAPI."
+
+Este prompt resultó especialmente efectivo porque:
+a) Definió el stack tecnológico exacto.
+b) Estableció la restricción de SQL crudo como regla inquebrantable.
+c) Estructuró la tarea en pasos secuenciales claros, produciendo
+   resultados directamente utilizables.
+
+Prompts de seguimiento:
+
+Durante la implementación se realizaron consultas adicionales para
+depuración de errores específicos (detallados en la sección 5).
+
+
+4. RESULTADOS OBTENIDOS
+------------------------
+
+El LLM produjo los siguientes artefactos de forma correcta:
+
+- schema.sql: DDL completo con 7 tablas, claves primarias y foráneas,
+  restricciones de unicidad, y dos triggers: trg_cupo_torneo (bloquea
+  inscripciones en torneos llenos) y trg_capitan_en_equipo (valida que
+  el capitán pertenezca al equipo).
+
+- data.sql: 3 torneos, 10 equipos, 50 jugadores, 24 partidas con bracket
+  completo, 240 filas de estadísticas individuales y caso de inscripción
+  fallida para prueba de validación.
+
+- app/main.py: 6 rutas implementadas con consultas SQL avanzadas,
+  incluyendo CTEs, UNION ALL, HAVING, NULLIF para división segura,
+  e ILIKE para búsqueda case-insensitive.
+
+- Templates Jinja2: 7 templates HTML funcionales con navegación completa
+  entre páginas.
+
+
+5. CASOS DONDE EL LLM SE EQUIVOCÓ
+------------------------------------
+
+Error 1 — Codificación de caracteres en data.sql:
+
+El LLM generó nombres con caracteres especiales del español (á, é, ó,
+ñ, ú) sin considerar que psql en Windows interpreta los archivos como
+WIN1252 por defecto, mientras que el archivo fue guardado en UTF-8.
+Al ejecutar data.sql, se produjo el error:
+
+  ERROR: carácter con secuencia de bytes 0x81 en codificación
+  «WIN1252» no tiene equivalente en la codificación «UTF8»
+
+Como consecuencia, el INSERT de jugadores falló completamente, lo que
+generó errores en cascada en el trigger de capitanes y en las
+estadísticas individuales.
+
+Corrección aplicada: Se agregó la directiva \encoding UTF8 al inicio
+de data.sql, indicando explícitamente a psql la codificación del
+archivo.
+
+---
+
+Error 2 — Incompatibilidad con Starlette 1.0.0:
+
+El LLM generó todas las llamadas a TemplateResponse con la firma
+correspondiente a versiones anteriores de Starlette, pasando request
+dentro del diccionario de contexto:
+
+  # Código generado por el LLM (incorrecto para Starlette 1.0.0)
+  templates.TemplateResponse("torneos.html", {"request": request, ...})
+
+Starlette 1.0.0 —versión instalada automáticamente por pip— modificó
+esta API, requiriendo request como primer argumento posicional. Esto
+produjo un TypeError: unhashable type: 'dict' en todas las rutas.
+
+Corrección aplicada: Se actualizaron manualmente las 6 llamadas a
+TemplateResponse en main.py:
+
+  # Código corregido
+  templates.TemplateResponse(request, "torneos.html", {...})
