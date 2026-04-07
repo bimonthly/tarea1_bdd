@@ -26,7 +26,8 @@ def _conninfo() -> str:
         f"port={os.getenv('DB_PORT', '5432')} "
         f"user={os.getenv('DB_USER', 'postgres')} "
         f"password={os.getenv('DB_PASSWORD', 'postgres')} "
-        f"dbname={os.getenv('DB_NAME', 'tarea1')}"
+        f"dbname={os.getenv('DB_NAME', 'tarea1')} "
+        f"client_encoding=UTF8"
     )
 
 
