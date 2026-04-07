@@ -425,10 +425,10 @@ async def inscripcion_post(
             )
         mensaje = "¡Equipo inscrito exitosamente en el torneo!"
 
-    except pg_errors.RaiseException as e:
+    except pg_errors.RaiseException:
         # El trigger trg_cupo_torneo levanta esta excepción cuando el torneo está lleno
         error   = True
-        mensaje = f"Inscripción rechazada: {e.diag.message_primary}"
+        mensaje = "Inscripción rechazada: el torneo ya alcanzó su número máximo de equipos."
 
     except pg_errors.UniqueViolation:
         # Constraint UNIQUE (equipo_id, torneo_id) en la tabla inscripciones
