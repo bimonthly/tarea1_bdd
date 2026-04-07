@@ -24,6 +24,10 @@
 
 Ejecutar desde la raíz del proyecto (`tarea1 BDD/`):
 
+### Windows (PowerShell)
+
+> Reemplaza `18` por tu versión de PostgreSQL instalada (ej. `16`, `17`).
+
 ```powershell
 # 1. Crear la base de datos
 & "C:\Program Files\PostgreSQL\18\bin\psql" -U postgres -c "CREATE DATABASE tarea1;"
@@ -41,12 +45,26 @@ pip install -r app\requirements.txt
 cd app; python -m uvicorn main:app --reload
 ```
 
-La aplicación quedará disponible en: **http://localhost:8000**
+### Mac / Linux
 
-> **Nota:** Los comandos anteriores usan la ruta de PostgreSQL 18 en Windows.
-> Ajusta según tu sistema operativo y versión instalada:
-> - **Windows con otra versión:** reemplaza `18` por tu versión (ej. `16`, `17`)
-> - **Mac/Linux:** `psql` debería estar en el PATH directamente, usa solo `psql -U postgres ...`
+```bash
+# 1. Crear la base de datos
+psql -U postgres -c "CREATE DATABASE tarea1;"
+
+# 2. Crear las tablas (DDL)
+psql -U postgres -d tarea1 -f schema.sql
+
+# 3. Cargar los datos sintéticos
+psql -U postgres -d tarea1 -f data.sql
+
+# 4. Instalar dependencias Python
+pip install -r app/requirements.txt
+
+# 5. Levantar el servidor web
+cd app && python -m uvicorn main:app --reload
+```
+
+La aplicación quedará disponible en: **http://localhost:8000**
 
 ---
 
