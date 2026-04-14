@@ -23,7 +23,7 @@ CREATE TABLE torneos (
     fecha_inicio    DATE         NOT NULL,
     fecha_fin       DATE         NOT NULL,
     prize_pool_usd  NUMERIC(12,2) NOT NULL CHECK (prize_pool_usd >= 0),
-    max_equipos     INTEGER      NOT NULL CHECK (max_equipos > 0),
+    max_equipos     INTEGER      NOT NULL DEFAULT 8 CHECK (max_equipos = 8),
     CONSTRAINT torneos_fechas_check CHECK (fecha_fin >= fecha_inicio)
 );
 
