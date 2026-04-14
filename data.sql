@@ -9,8 +9,8 @@
 -- ============================================================
 INSERT INTO torneos (id, nombre, videojuego, fecha_inicio, fecha_fin, prize_pool_usd, max_equipos) VALUES
 (1, 'Liga Mundial Valorant 2026',      'Valorant',       '2026-01-10', '2026-02-28', 100000.00, 8),
-(2, 'Torneo Regional League of Legends', 'League of Legends', '2026-03-01', '2026-03-31',  40000.00, 4),
-(3, 'Copa Latinoamérica CS2 2026',     'Counter-Strike 2','2026-04-01', '2026-04-30',  25000.00, 6);
+(2, 'Torneo Regional League of Legends', 'League of Legends', '2026-03-01', '2026-05-31',  40000.00, 8),
+(3, 'Copa Latinoamérica CS2 2026',     'Counter-Strike 2','2026-04-01', '2026-06-30',  25000.00, 8);
 
 SELECT setval('torneos_id_seq', 3);
 
@@ -137,20 +137,25 @@ INSERT INTO sponsors_torneos (sponsor_id, torneo_id, monto_usd) VALUES
 
 -- ============================================================
 -- 5. INSCRIPCIONES
--- T1 (max_equipos=8): equipos 1-8  →  torneo lleno
--- T2 (max_equipos=4): equipos 1,3,9,10
--- T3 (max_equipos=6): equipos 2,5,7
+-- T1 (max_equipos=8): equipos 1-8   → torneo lleno (terminado)
+-- T2 (max_equipos=8): equipos 1,2,3,4,5,6,9,10 → torneo lleno (en curso)
+--    Grupo A (1,3,9,10): round-robin completado
+--    Grupo B (2,4,5,6): partidas pendientes
+-- T3 (max_equipos=8): equipos 1,2,3,5,7 → torneo NO lleno (en curso, 5/8)
 -- ============================================================
 INSERT INTO inscripciones (equipo_id, torneo_id, fecha_inscripcion) VALUES
 -- Torneo 1 (lleno)
 (1, 1, '2026-01-05'), (2, 1, '2026-01-05'), (3, 1, '2026-01-06'),
 (4, 1, '2026-01-06'), (5, 1, '2026-01-07'), (6, 1, '2026-01-07'),
 (7, 1, '2026-01-08'), (8, 1, '2026-01-08'),
--- Torneo 2
+-- Torneo 2 (lleno: 8 equipos)
 (1, 2, '2026-02-25'), (3, 2, '2026-02-25'),
 (9, 2, '2026-02-26'), (10, 2, '2026-02-26'),
--- Torneo 3
-(2, 3, '2026-03-25'), (5, 3, '2026-03-25'), (7, 3, '2026-03-26');
+(2, 2, '2026-02-27'), (4, 2, '2026-02-27'),
+(5, 2, '2026-02-28'), (6, 2, '2026-02-28'),
+-- Torneo 3 (no lleno: 5/8 equipos)
+(2, 3, '2026-03-25'), (5, 3, '2026-03-25'), (7, 3, '2026-03-26'),
+(1, 3, '2026-03-26'), (3, 3, '2026-03-27');
 
 -- ============================================================
 -- INTENTO DE INSCRIPCIÓN FALLIDA
@@ -171,9 +176,10 @@ $$;
 -- ============================================================
 -- 6. PARTIDAS
 -- T1: Grupo A (eq 1-4, 6 partidas) + Grupo B (eq 5-8, 6 partidas)
---     + 2 Semifinales + 1 Final  =  15 partidas
--- T2: Round-robin 4 equipos (1,3,9,10) = 6 partidas
--- T3: Round-robin 3 equipos (2,5,7)    = 3 partidas
+--     + 2 Semifinales + 1 Final  =  15 partidas  (TERMINADO)
+-- T2: Grupo A (eq 1,3,9,10, 6 partidas) + Grupo B (eq 2,4,5,6, 6 partidas)
+--     = 12 partidas de fase de grupos; semis y final pendientes (EN CURSO)
+-- T3: Sin partidas (torneo en fase de inscripción, NO LLENO)
 -- ============================================================
 INSERT INTO partidas (id, torneo_id, equipo_a_id, equipo_b_id, fecha_hora, puntaje_a, puntaje_b, fase) VALUES
 -- Torneo 1 – Grupo A
@@ -195,19 +201,22 @@ INSERT INTO partidas (id, torneo_id, equipo_a_id, equipo_b_id, fecha_hora, punta
 (14, 1, 5, 2, '2026-02-10 18:00', 2, 1, 'semifinal'),
 -- Torneo 1 – Final
 (15, 1, 1, 5, '2026-02-28 17:00', 3, 2, 'final'),
--- Torneo 2 – Grupo único (equipos 1,3,9,10)
+-- Torneo 2 – Grupo A (equipos 1,3,9,10)
 (16, 2,  1,  3, '2026-03-05 15:00', 2, 0, 'fase_grupos'),
 (17, 2,  1,  9, '2026-03-05 17:00', 3, 1, 'fase_grupos'),
 (18, 2,  1, 10, '2026-03-07 15:00', 2, 1, 'fase_grupos'),
 (19, 2,  3,  9, '2026-03-07 17:00', 1, 0, 'fase_grupos'),
 (20, 2,  3, 10, '2026-03-10 15:00', 2, 2, 'fase_grupos'),
 (21, 2,  9, 10, '2026-03-10 17:00', 1, 2, 'fase_grupos'),
--- Torneo 3 – Grupo único (equipos 2,5,7)
-(22, 3,  2,  5, '2026-04-05 15:00', 1, 2, 'fase_grupos'),
-(23, 3,  2,  7, '2026-04-05 17:00', 3, 1, 'fase_grupos'),
-(24, 3,  5,  7, '2026-04-07 15:00', 2, 1, 'fase_grupos');
+-- Torneo 2 – Grupo B (equipos 2,4,5,6)
+(25, 2,  2,  4, '2026-03-12 15:00', 2, 1, 'fase_grupos'),
+(26, 2,  2,  5, '2026-03-12 17:00', 1, 2, 'fase_grupos'),
+(27, 2,  2,  6, '2026-03-13 15:00', 3, 1, 'fase_grupos'),
+(28, 2,  4,  5, '2026-03-13 17:00', 0, 2, 'fase_grupos'),
+(29, 2,  4,  6, '2026-03-14 15:00', 1, 1, 'fase_grupos'),
+(30, 2,  5,  6, '2026-03-14 17:00', 2, 0, 'fase_grupos');
 
-SELECT setval('partidas_id_seq', 24);
+SELECT setval('partidas_id_seq', 30);
 
 -- ============================================================
 -- 7. ESTADÍSTICAS INDIVIDUALES  (kos, restarts, assists)
@@ -277,14 +286,23 @@ INSERT INTO estadisticas_individuales (partida_id, jugador_id, kos, restarts, as
 -- Partida 21 (T2: ThunderHawks vs SolarFlares, 1-2)
 (21,41,2,3,2),(21,42,3,2,1),(21,43,2,3,2),(21,44,1,4,1),(21,45,2,3,1),
 (21,46,4,1,3),(21,47,5,2,2),(21,48,4,1,2),(21,49,3,2,2),(21,50,4,1,2),
--- Partida 22 (T3: StormRiders vs CyberDragons, 1-2)
-(22, 6,3,3,2),(22, 7,4,2,1),(22, 8,3,3,2),(22, 9,2,3,1),(22,10,3,2,2),
-(22,21,5,1,3),(22,22,4,2,3),(22,23,5,1,2),(22,24,4,1,3),(22,25,5,0,2),
--- Partida 23 (T3: StormRiders vs NeonVipers, 3-1)
-(23, 6,6,1,3),(23, 7,5,1,3),(23, 8,5,2,2),(23, 9,4,1,3),(23,10,5,0,2),
-(23,31,3,4,1),(23,32,2,3,2),(23,33,3,4,1),(23,34,2,3,1),(23,35,1,4,2),
--- Partida 24 (T3: CyberDragons vs NeonVipers, 2-1)
-(24,21,6,1,3),(24,22,5,2,2),(24,23,5,1,3),(24,24,4,2,2),(24,25,5,0,2),
-(24,31,3,3,2),(24,32,2,3,1),(24,33,3,3,2),(24,34,2,4,1),(24,35,1,3,1);
+-- Partida 25 (T2 GrupoB: StormRiders vs IronWolves, 2-1)
+(25, 6,5,1,3),(25, 7,4,2,2),(25, 8,5,1,3),(25, 9,3,1,2),(25,10,4,0,2),
+(25,16,2,3,2),(25,17,3,2,1),(25,18,2,3,1),(25,19,1,3,1),(25,20,2,2,2),
+-- Partida 26 (T2 GrupoB: StormRiders vs CyberDragons, 1-2)
+(26, 6,3,3,2),(26, 7,4,2,1),(26, 8,3,3,2),(26, 9,2,2,1),(26,10,3,2,2),
+(26,21,6,1,3),(26,22,5,2,3),(26,23,5,1,2),(26,24,4,2,2),(26,25,5,0,2),
+-- Partida 27 (T2 GrupoB: StormRiders vs ShadowForce, 3-1)
+(27, 6,6,1,3),(27, 7,5,1,3),(27, 8,5,2,2),(27, 9,4,1,3),(27,10,5,0,2),
+(27,26,3,3,2),(27,27,2,3,2),(27,28,3,2,1),(27,29,2,3,2),(27,30,2,3,1),
+-- Partida 28 (T2 GrupoB: IronWolves vs CyberDragons, 0-2)
+(28,16,1,4,1),(28,17,2,3,1),(28,18,1,4,2),(28,19,2,3,1),(28,20,1,3,1),
+(28,21,6,1,3),(28,22,5,1,2),(28,23,5,1,3),(28,24,4,1,2),(28,25,5,0,3),
+-- Partida 29 (T2 GrupoB: IronWolves vs ShadowForce, 1-1)
+(29,16,3,2,2),(29,17,2,2,2),(29,18,3,3,1),(29,19,2,2,2),(29,20,2,3,1),
+(29,26,3,2,2),(29,27,2,3,2),(29,28,3,2,2),(29,29,2,2,1),(29,30,2,3,2),
+-- Partida 30 (T2 GrupoB: CyberDragons vs ShadowForce, 2-0)
+(30,21,6,1,3),(30,22,5,2,3),(30,23,5,1,2),(30,24,4,2,2),(30,25,5,0,2),
+(30,26,2,4,1),(30,27,1,3,1),(30,28,2,4,2),(30,29,1,3,1),(30,30,2,3,2);
 
-SELECT setval('estadisticas_individuales_id_seq', 240);
+SELECT setval('estadisticas_individuales_id_seq', 270);

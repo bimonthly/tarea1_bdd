@@ -24,32 +24,9 @@
 
 Ejecutar desde la raíz del proyecto (`tarea1 BDD/`):
 
-### Windows (PowerShell)
-
-> Reemplaza `18` por tu versión de PostgreSQL instalada (ej. `16`, `17`).
-
-```powershell
-# 1. Crear la base de datos
-& "C:\Program Files\PostgreSQL\18\bin\psql" -U postgres -c "CREATE DATABASE tarea1;"
-
-# 2. Crear las tablas (DDL)
-& "C:\Program Files\PostgreSQL\18\bin\psql" -U postgres -d tarea1 -f schema.sql
-
-# 3. Cargar los datos sintéticos
-& "C:\Program Files\PostgreSQL\18\bin\psql" -U postgres -d tarea1 -f data.sql
-
-# 4. Instalar dependencias Python
-pip install -r app\requirements.txt
-
-# 5. Levantar el servidor web
-cd app; python -m uvicorn main:app --reload
-```
-
-### Mac / Linux
-
 ```bash
 # 1. Crear la base de datos
-psql -U postgres -c "CREATE DATABASE tarea1;"
+createdb -U postgres tarea1
 
 # 2. Crear las tablas (DDL)
 psql -U postgres -d tarea1 -f schema.sql
@@ -61,7 +38,7 @@ psql -U postgres -d tarea1 -f data.sql
 pip install -r app/requirements.txt
 
 # 5. Levantar el servidor web
-cd app && python -m uvicorn main:app --reload
+cd app && uvicorn main:app --reload
 ```
 
 La aplicación quedará disponible en: **http://localhost:8000**
@@ -83,13 +60,13 @@ Si no se definen, usa los siguientes **valores por defecto**:
 
 Para usar valores distintos, exportar antes de levantar la app:
 
-```powershell
-$env:DB_HOST="localhost"
-$env:DB_PORT="5432"
-$env:DB_USER="postgres"
-$env:DB_PASSWORD="mipassword"
-$env:DB_NAME="tarea1"
-cd app; python -m uvicorn main:app --reload
+```bash
+export DB_HOST=localhost
+export DB_PORT=5432
+export DB_USER=postgres
+export DB_PASSWORD=mipassword
+export DB_NAME=tarea1
+cd app && uvicorn main:app --reload
 ```
 
 ---
@@ -136,4 +113,4 @@ tarea1 BDD/
 - **Base de datos:** PostgreSQL 14+
 - **Backend:** Python · FastAPI · psycopg (v3)
 - **Vistas:** Jinja2 (templates HTML renderizados desde el servidor)
-- **Consultas:** SQL crudo explícito — sin ORM de ningún tipo
+- **Consultas:** SQL explícito — sin ORM

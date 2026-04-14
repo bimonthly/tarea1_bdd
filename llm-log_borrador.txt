@@ -76,7 +76,7 @@ El LLM produjo los siguientes artefactos de forma correcta:
 5. CASOS DONDE EL LLM SE EQUIVOCÓ
 ------------------------------------
 
-Error 1 — Codificación de caracteres en data.sql:
+Error 1 - Codificación de caracteres en data.sql:
 
 El LLM generó nombres con caracteres especiales del español (á, é, ó,
 ñ, ú) sin considerar que psql en Windows interpreta los archivos como
@@ -94,23 +94,13 @@ Corrección aplicada: Se agregó la directiva \encoding UTF8 al inicio
 de data.sql, indicando explícitamente a psql la codificación del
 archivo.
 
----
+Error 2 - Modelamiento de número mínimo de equipos en torneo:
 
-Error 2 — Incompatibilidad con Starlette 1.0.0:
+Descrito en el informe.
 
-El LLM generó todas las llamadas a TemplateResponse con la firma
-correspondiente a versiones anteriores de Starlette, pasando request
-dentro del diccionario de contexto:
+Error 3:
 
-  # Código generado por el LLM (incorrecto para Starlette 1.0.0)
-  templates.TemplateResponse("torneos.html", {"request": request, ...})
+En general pequeños bugs en el funcionamiento de la página web, que 
+fueron corregidos a través de prompts posteriores.
 
-Starlette 1.0.0 —versión instalada automáticamente por pip— modificó
-esta API, requiriendo request como primer argumento posicional. Esto
-produjo un TypeError: unhashable type: 'dict' en todas las rutas.
 
-Corrección aplicada: Se actualizaron manualmente las 6 llamadas a
-TemplateResponse en main.py:
-
-  # Código corregido
-  templates.TemplateResponse(request, "torneos.html", {...})
